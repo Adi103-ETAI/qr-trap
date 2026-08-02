@@ -1,12 +1,24 @@
 'use client';
 
 import { useState } from 'react';
-import { signIn } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
+import { createClient } from '@/lib/supabase/client';
 
 export function GoogleSignInButton() {
   const [loading, setLoading] = useState(false);
+  const supabase = createClient();
+
+  const handleSignIn = async () => {
+    setLoading(true);
+    await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback?next=/register/details`,
+      },
+    });
+    // No setLoading(false) — the browser redirects to Google.
+  };
 
   return (
     <Button
@@ -14,13 +26,7 @@ export function GoogleSignInButton() {
       variant="outline"
       className="w-full h-12 text-base bg-white text-zinc-900 hover:bg-zinc-100 border-zinc-300"
       disabled={loading}
-      onClick={() => {
-        setLoading(true);
-        // callbackUrl lands on /register/details after Google OAuth redirect
-        signIn('google', { callbackUrl: '/register/details' }).finally(() => {
-          setLoading(false);
-        });
-      }}
+      onClick={handleSignIn}
     >
       {loading ? (
         <Loader2 className="h-5 w-5 animate-spin" />

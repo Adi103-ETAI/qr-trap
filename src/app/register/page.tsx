@@ -4,8 +4,8 @@ import Image from 'next/image';
 import { GoogleSignInButton } from '@/components/registration/GoogleSignInButton';
 import { DemoSignInButton } from '@/components/registration/DemoSignInButton';
 
-const googleConfigured = !!(
-  process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
+const supabaseConfigured = !!(
+  process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 );
 
 export default function RegisterPage() {
@@ -63,7 +63,7 @@ export default function RegisterPage() {
 
             {/* Sign-in card */}
             <div className="rounded-xl border border-border bg-card/60 backdrop-blur p-6 space-y-4">
-              {googleConfigured ? (
+              {supabaseConfigured ? (
                 <GoogleSignInButton />
               ) : (
                 <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-3 text-xs text-amber-200">

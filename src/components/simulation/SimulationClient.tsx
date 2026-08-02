@@ -31,7 +31,7 @@ export function SimulationClient({ token, initialStatus }: Props) {
     }).catch((err) => console.warn('[opened] failed:', err));
   }, [token]);
 
-  // Subscribe to socket.io. On `simulation:reveal` -> revealed.
+  // Subscribe to Supabase Realtime. On status=revealed -> revealed.
   // On `simulation:launched` -> launched.
   useEffect(() => {
     const sub = subscribeToSimulation(
