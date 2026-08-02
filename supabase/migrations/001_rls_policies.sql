@@ -1,5 +1,9 @@
 -- Row Level Security policies for the Cyber Club awareness simulation.
 -- Run this in the Supabase SQL Editor after `prisma db push` creates the tables.
+--
+-- NOTE: Column names must be double-quoted (e.g. "authUserId") because
+-- Prisma creates them as camelCase with quoted identifiers. Without
+-- quotes, PostgreSQL lowercases them and the column won't be found.
 
 -- ============================================================================
 -- Participant table
@@ -12,7 +16,7 @@ alter table "Participant" enable row level security;
 
 create policy "Participants can read own row"
   on "Participant" for select
-  using (authUserId = auth.uid()::text);
+  using ("authUserId" = auth.uid()::text);
 
 -- No insert/update/delete policies for the anon key — all participant
 -- creation happens via server actions using the service role client.
