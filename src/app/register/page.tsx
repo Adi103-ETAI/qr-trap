@@ -2,11 +2,6 @@ import Link from 'next/link';
 import { Shield, ChevronLeft } from 'lucide-react';
 import Image from 'next/image';
 import { GoogleSignInButton } from '@/components/registration/GoogleSignInButton';
-import { DemoSignInButton } from '@/components/registration/DemoSignInButton';
-
-const supabaseConfigured = !!(
-  process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-);
 
 export default function RegisterPage() {
   return (
@@ -63,24 +58,7 @@ export default function RegisterPage() {
 
             {/* Sign-in card */}
             <div className="rounded-xl border border-border bg-card/60 backdrop-blur p-6 space-y-4">
-              {supabaseConfigured ? (
-                <GoogleSignInButton />
-              ) : (
-                <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-3 text-xs text-amber-200">
-                  <p className="font-medium">Google sign-in is not configured.</p>
-                  <p className="mt-1 text-amber-200/80">
-                    Use the demo option below to preview the registration flow.
-                  </p>
-                </div>
-              )}
-
-              <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                <div className="flex-1 h-px bg-border" />
-                <span className="font-mono">OR</span>
-                <div className="flex-1 h-px bg-border" />
-              </div>
-
-              <DemoSignInButton />
+              <GoogleSignInButton />
             </div>
 
             {/* Trust line */}

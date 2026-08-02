@@ -9,7 +9,6 @@ import {
   Award,
   Bell,
   ArrowUpRight,
-  Shield,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -190,28 +189,6 @@ export default async function DashboardPage() {
             </Card>
           </div>
 
-          {/* Call to action */}
-          <Card className="bg-card/60 backdrop-blur border-dashed">
-            <CardContent className="pt-6">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-                <div className="h-12 w-12 rounded-lg bg-red-600/15 border border-red-500/30 flex items-center justify-center shrink-0">
-                  <Shield className="h-6 w-6 text-red-500" />
-                </div>
-                <div className="flex-1">
-                  <p className="font-semibold text-foreground">See you at the launch.</p>
-                  <p className="text-sm text-muted-foreground mt-0.5">
-                    Bring a laptop, bring a friend, and bring your curiosity.
-                  </p>
-                </div>
-                <Button asChild variant="outline" size="sm">
-                  <Link href="/">
-                    Back to home
-                    <ArrowUpRight className="h-4 w-4" />
-                  </Link>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
         </div>
       </section>
     </main>
