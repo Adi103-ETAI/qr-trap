@@ -15,6 +15,7 @@ model Participant {
   authUserId          String   @unique
   email               String
   name                String?
+  department          String?
   simulationTokenHash String   @unique
   registeredAt        DateTime @default(now())
   emailSent           Boolean  @default(false)

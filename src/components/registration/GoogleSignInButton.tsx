@@ -16,8 +16,8 @@ export function GoogleSignInButton() {
       disabled={loading}
       onClick={() => {
         setLoading(true);
-        // callbackUrl lands on /register?status=success after redirect
-        signIn('google', { callbackUrl: '/register?status=success' }).finally(() => {
+        // callbackUrl lands on /register/details after Google OAuth redirect
+        signIn('google', { callbackUrl: '/register/details' }).finally(() => {
           setLoading(false);
         });
       }}
