@@ -4,7 +4,7 @@ import { db } from '@/lib/db';
 import { generateToken, hashToken } from '@/lib/simulation/tokens';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { createServerClient } from '@/lib/supabase/server';
+import { createServerSupabaseClient } from '@/lib/supabase/server';
 
 /**
  * Registration flow (no spoilers):
@@ -37,7 +37,7 @@ export interface RegistrationDetails {
 export async function getRegistrationSession(): Promise<RegistrationDetails | null> {
   // 1. Try Supabase Auth session first.
   try {
-    const supabase = await createServerClient();
+    const supabase = await createServerSupabaseClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (user?.email) {
       return {

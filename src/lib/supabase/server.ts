@@ -4,8 +4,11 @@ import { cookies } from 'next/headers';
 /**
  * Server-side Supabase client for Server Components, Route Handlers, and
  * Server Actions. Reads the session from cookies. Respects RLS policies.
+ *
+ * NOTE: Function is renamed to avoid a naming collision with the
+ * `createServerClient` import from @supabase/ssr.
  */
-export async function createServerClient() {
+export async function createServerSupabaseClient() {
   const cookieStore = await cookies();
 
   return createServerClient(
