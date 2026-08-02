@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Shield, ChevronLeft } from 'lucide-react';
+import { ChevronLeft } from 'lucide-react';
 import Image from 'next/image';
 import { GoogleSignInButton } from '@/components/registration/GoogleSignInButton';
 
@@ -61,11 +61,6 @@ export default function RegisterPage() {
               <GoogleSignInButton />
             </div>
 
-            {/* Trust line */}
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              <Shield className="inline h-3 w-3 mr-1 text-red-500" />
-              We only collect your name and email. No passwords. No payment info.
-            </p>
           </div>
         </div>
       </section>

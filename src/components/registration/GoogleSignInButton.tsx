@@ -21,20 +21,23 @@ export function GoogleSignInButton() {
   };
 
   return (
-    <Button
+    <button
       type="button"
-      variant="outline"
-      className="w-full h-12 text-base bg-white text-zinc-900 hover:bg-zinc-100 border-zinc-300"
-      disabled={loading}
       onClick={handleSignIn}
+      disabled={loading}
+<<<<<<< Updated upstream
+      onClick={handleSignIn}
+=======
+      className="w-full h-12 px-4 rounded-md text-base font-medium bg-white text-zinc-900 border border-zinc-300 hover:bg-zinc-50 hover:text-zinc-900 flex items-center justify-center gap-3 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+>>>>>>> Stashed changes
     >
       {loading ? (
-        <Loader2 className="h-5 w-5 animate-spin" />
+        <Loader2 className="h-5 w-5 animate-spin text-zinc-900" />
       ) : (
         <GoogleIcon />
       )}
-      Continue with Google
-    </Button>
+      <span className="text-zinc-900">Continue with Google</span>
+    </button>
   );
 }
 
