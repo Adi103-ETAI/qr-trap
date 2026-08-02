@@ -35,12 +35,12 @@ export function Hero() {
           transition={{ duration: 0.6, delay: 0.1 }}
           className="relative"
         >
-          <div className="relative h-24 w-24 sm:h-28 sm:w-28 rounded-2xl overflow-hidden bg-card/40 border border-border flex items-center justify-center shadow-[0_0_40px_rgba(220,38,38,0.3)]">
+          <div className="relative h-36 w-36 sm:h-44 sm:w-44 rounded-2xl overflow-hidden bg-card/40 border border-border flex items-center justify-center shadow-[0_0_40px_rgba(220,38,38,0.3)]">
             <Image
               src="/cyberclub-optimized.png"
               alt="Cyber Club logo"
-              width={112}
-              height={112}
+              width={176}
+              height={176}
               className="h-full w-full object-contain"
               priority
             />
