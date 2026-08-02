@@ -1,0 +1,73 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Participant {
+  id                  String   @id @default(cuid())
+  authUserId          String   @unique
+  email               String
+  name                String?
+  simulationTokenHash String   @unique
+  registeredAt        DateTime @default(now())
+  emailSent           Boolean  @default(false)
+  emailSentAt         DateTime?
+  simulationOpened    Boolean  @default(false)
+  simulationOpenedAt  DateTime?
+  clicked             Boolean  @default(false)
+  clickedAt           DateTime?
+  events              SimulationEvent[]
+
+  @@index([simulationTokenHash])
+  @@index([email])
+}
+
+model Simulation {
+  id         String    @id @default(cuid())
+  status     String    @default("idle") // idle | launched | revealed
+  launchedAt DateTime?
+  revealedAt DateTime?
+  createdAt  DateTime  @default(now())
+}
+
+model SimulationEvent {
+  id            String   @id @default(cuid())
+  participantId String
+  eventType     String   // registered | email_sent | simulation_opened | simulation_clicked | reveal_seen
+  createdAt     DateTime @default(now())
+  metadata      String?  // JSON string (SQLite doesn't have native JSONB)
+  participant   Participant @relation(fields: [participantId], references: [id], onDelete: Cascade)
+
+  @@index([participantId])
+  @@index([eventType])
+  @@index([createdAt])
+}
+
+model EmailLog {
+  id            String   @id @default(cuid())
+  participantId String
+  toEmail       String
+  subject       String
+  body          String
+  tokenUsed     String   // SANDBOX-ONLY: actual token stored for admin demo visibility. PRODUCTION: do not store this.
+  status        String   @default("sent") // sent | failed
+  error         String?
+  createdAt     DateTime @default(now())
+
+  @@index([participantId])
+  @@index([createdAt])
+}
+
+model AdminSession {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+}
