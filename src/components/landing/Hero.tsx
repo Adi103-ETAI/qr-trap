@@ -35,12 +35,12 @@ export function Hero() {
           transition={{ duration: 0.6, delay: 0.1 }}
           className="relative"
         >
-          <div className="relative h-36 w-36 sm:h-44 sm:w-44 rounded-2xl overflow-hidden bg-card/40 border border-border flex items-center justify-center shadow-[0_0_40px_rgba(220,38,38,0.3)]">
+          <div className="relative h-48 w-48 sm:h-56 sm:w-56 lg:h-64 lg:w-64 rounded-2xl overflow-hidden bg-card/40 border border-border flex items-center justify-center shadow-[0_0_40px_rgba(220,38,38,0.3)]">
             <Image
               src="/cyberclub-optimized.png"
               alt="Cyber Club logo"
-              width={176}
-              height={176}
+              width={256}
+              height={256}
               className="h-full w-full object-contain"
               priority
             />
@@ -54,7 +54,7 @@ export function Hero() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className="font-mono text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight"
+          className="font-mono text-6xl sm:text-7xl lg:text-8xl font-bold tracking-tight"
         >
           <span className="text-foreground">Cyber</span>{' '}
           <span className="text-red-500">Club</span>
