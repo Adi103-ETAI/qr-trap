@@ -36,8 +36,9 @@ export function LandingFooter() {
           <div className="flex items-center gap-2 text-center">
             <Terminal className="h-4 w-4 text-red-500" />
             <p className="font-mono text-sm text-muted-foreground">
-              <span className="text-foreground">Stay Vigilant.</span>{' '}
-              Build. <span className="text-foreground">Break.</span>{' '}
+              Stay Vigilant.{' '}
+              <span className="text-foreground">Build.</span>{' '}
+              <span className="text-foreground">Break.</span>{' '}
               <span className="text-foreground">Learn.</span>{' '}
               <span className="text-foreground">Repeat.</span>
             </p>
