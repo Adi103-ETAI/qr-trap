@@ -26,7 +26,7 @@ export function Hero() {
           className="inline-flex items-center gap-2 rounded-full border border-border bg-card/60 backdrop-blur px-3 py-1 text-xs font-mono text-muted-foreground"
         >
           <span className="inline-block h-2 w-2 rounded-full bg-red-500 pulse-red" />
-          LIVE AWARENESS EXERCISE — CYBER CLUB
+          JOIN US — CYBER CLUB LAUNCH
         </motion.div>
 
         <motion.div
@@ -66,7 +66,7 @@ export function Hero() {
           transition={{ duration: 0.6, delay: 0.3 }}
           className="font-mono text-lg sm:text-xl text-red-400 tracking-wider"
         >
-          &gt; YOU HAVE BEEN HACKED_
+          &gt; WELCOME TO THE CLUB_
           <span className="blink">|</span>
         </motion.p>
 
@@ -76,10 +76,9 @@ export function Hero() {
           transition={{ duration: 0.6, delay: 0.4 }}
           className="max-w-2xl text-base sm:text-lg text-muted-foreground leading-relaxed"
         >
-          A controlled cybersecurity awareness simulation. Register for the
-          event, receive a security notification, witness a live social
-          engineering demonstration, and learn how to defend yourself
-          against real-world attacks. <span className="text-foreground font-medium">No real hacking occurs.</span>
+          We&apos;re a community of students obsessed with security, code,
+          and the dark corners of the internet. The club is officially
+          launching. <span className="text-foreground font-medium">Be there.</span>
         </motion.p>
 
         <motion.div
@@ -102,9 +101,9 @@ export function Hero() {
           transition={{ duration: 0.6, delay: 0.7 }}
           className="mt-6 grid grid-cols-3 gap-4 sm:gap-8 text-center"
         >
-          <Stat value="300+" label="Participants" />
-          <Stat value="5" label="Attack Vectors" />
-          <Stat value="0" label="Real Breaches" />
+          <Stat value="300+" label="Seats" />
+          <Stat value="1" label="Night" />
+          <Stat value="∞" label="Curiosity" />
         </motion.div>
       </div>
     </section>

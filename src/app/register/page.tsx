@@ -76,8 +76,8 @@ function RegisterView({ googleConfigured }: { googleConfigured: boolean }) {
         </div>
         <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">Register for the Event</h1>
         <p className="text-muted-foreground max-w-md mx-auto">
-          Sign in to confirm your participation in the Cyber Club launch
-          awareness simulation. We collect only your name and email.
+          Sign in to confirm your spot at the Cyber Club launch. We collect
+          only your name and email.
         </p>
       </div>
 
@@ -122,9 +122,8 @@ function SuccessView({ demoUrl }: { demoUrl: string | null }) {
         </div>
         <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">Registration Complete</h1>
         <p className="text-muted-foreground max-w-md mx-auto">
-          You're on the list. When the simulation launches at the event,
-          you'll receive a security notification email containing your
-          personal simulation link.
+          You&apos;re on the list. We&apos;ll be in touch by email before the
+          launch — keep an eye on your inbox.
         </p>
       </div>
 
@@ -133,18 +132,18 @@ function SuccessView({ demoUrl }: { demoUrl: string | null }) {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <InfoStep
               icon={Clock}
-              title="Wait for launch"
-              desc="The host will launch the simulation during the event."
+              title="Save the date"
+              desc="The launch event is happening soon. Show up on time."
             />
             <InfoStep
               icon={MailOpen}
-              title="Check your inbox"
-              desc="An email titled “Security Notification” will arrive."
+              title="Watch your inbox"
+              desc="We'll send you a follow-up email before the event."
             />
             <InfoStep
               icon={Eye}
-              title="Observe your reaction"
-              desc="Notice how the notification makes you feel. That's the lesson."
+              title="Stay curious"
+              desc="Come with an open mind. That's all you need."
             />
           </div>
         </CardContent>
@@ -188,14 +187,12 @@ function PrivacyNotice() {
           <div className="text-sm text-muted-foreground space-y-2">
             <p className="font-medium text-foreground">Privacy</p>
             <p>
-              We store only your name, email, and a hashed simulation token.
-              Tokens are 64-character cryptographic random values; we never
-              store the raw token on the participant record (only its SHA-256
-              hash). The simulation URL is the only way to open your page.
+              We store only your name and email — nothing else. No passwords,
+              no payment info, no device access.
             </p>
             <p>
-              You can request deletion of your data after the event by
-              contacting the Cyber Club organizers.
+              You can request deletion of your data at any time by contacting
+              the Cyber Club organizers.
             </p>
           </div>
         </div>

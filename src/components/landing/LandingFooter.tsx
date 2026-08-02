@@ -29,16 +29,16 @@ export function LandingFooter() {
             </div>
             <div>
               <p className="font-mono font-bold text-foreground">CYBER CLUB</p>
-              <p className="text-xs text-muted-foreground">Awareness Simulation Platform</p>
+              <p className="text-xs text-muted-foreground">Student Security Community</p>
             </div>
           </div>
 
           <div className="flex items-center gap-2 text-center">
             <Terminal className="h-4 w-4 text-red-500" />
             <p className="font-mono text-sm text-muted-foreground">
-              Stay vigilant. <span className="text-foreground">Stop.</span>{' '}
-              <span className="text-foreground">Think.</span>{' '}
-              <span className="text-foreground">Verify.</span>
+              Build. <span className="text-foreground">Break.</span>{' '}
+              <span className="text-foreground">Learn.</span>{' '}
+              <span className="text-foreground">Repeat.</span>
             </p>
           </div>
 
@@ -53,8 +53,7 @@ export function LandingFooter() {
         </motion.div>
 
         <p className="mt-6 text-center text-xs text-muted-foreground font-mono">
-          © {new Date().getFullYear()} Cyber Club · This is a controlled
-          awareness exercise · No real systems were compromised
+          © {new Date().getFullYear()} Cyber Club · Built by students, for students
         </p>
       </div>
     </footer>

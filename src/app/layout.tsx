@@ -14,16 +14,16 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Cyber Club — Awareness Simulation",
+  title: "Cyber Club",
   description:
-    "A controlled cybersecurity awareness exercise by Cyber Club. Stay vigilant. Stop. Think. Verify.",
+    "Cyber Club — a student-run community for security, code, and curiosity. Join the launch.",
   keywords: [
     "cybersecurity",
-    "awareness",
-    "simulation",
-    "phishing",
-    "social engineering",
     "cyber club",
+    "student club",
+    "security",
+    "technology",
+    "CTF",
   ],
   authors: [{ name: "Cyber Club" }],
   robots: { index: false, follow: false },
