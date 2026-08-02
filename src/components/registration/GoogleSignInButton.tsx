@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 
@@ -17,7 +16,6 @@ export function GoogleSignInButton() {
         redirectTo: `${window.location.origin}/auth/callback?next=/register/details`,
       },
     });
-    // No setLoading(false) — the browser redirects to Google.
   };
 
   return (
@@ -25,11 +23,7 @@ export function GoogleSignInButton() {
       type="button"
       onClick={handleSignIn}
       disabled={loading}
-<<<<<<< Updated upstream
-      onClick={handleSignIn}
-=======
       className="w-full h-12 px-4 rounded-md text-base font-medium bg-white text-zinc-900 border border-zinc-300 hover:bg-zinc-50 hover:text-zinc-900 flex items-center justify-center gap-3 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
->>>>>>> Stashed changes
     >
       {loading ? (
         <Loader2 className="h-5 w-5 animate-spin text-zinc-900" />
