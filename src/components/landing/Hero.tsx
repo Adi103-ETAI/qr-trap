@@ -56,7 +56,8 @@ export function Hero() {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="font-mono text-6xl sm:text-7xl lg:text-8xl font-bold tracking-tight"
         >
-          <span className="text-foreground">Cyber</span><span className="text-red-500">Club</span>
+          <span className="text-foreground">Cyber</span>{' '}
+          <span className="text-red-500">Club</span>
         </motion.h1>
 
         <motion.p
