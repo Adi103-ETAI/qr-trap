@@ -1,8 +1,9 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Shield, ShieldAlert, ChevronRight, Lock } from 'lucide-react';
+import { Shield, Lock } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 
 export function Hero() {
@@ -25,7 +26,7 @@ export function Hero() {
           className="inline-flex items-center gap-2 rounded-full border border-border bg-card/60 backdrop-blur px-3 py-1 text-xs font-mono text-muted-foreground"
         >
           <span className="inline-block h-2 w-2 rounded-full bg-red-500 pulse-red" />
-          LIVE AWARENESS EXERCISE — CYBER CLUB LAUNCH
+          LIVE AWARENESS EXERCISE — CYBER CLUB
         </motion.div>
 
         <motion.div
@@ -34,11 +35,18 @@ export function Hero() {
           transition={{ duration: 0.6, delay: 0.1 }}
           className="relative"
         >
-          <div className="relative h-20 w-20 sm:h-24 sm:w-24 rounded-2xl bg-gradient-to-br from-red-600 to-red-800 flex items-center justify-center shadow-[0_0_40px_rgba(220,38,38,0.4)]">
-            <ShieldAlert className="h-10 w-10 sm:h-12 sm:w-12 text-white" strokeWidth={2} />
+          <div className="relative h-24 w-24 sm:h-28 sm:w-28 rounded-2xl overflow-hidden bg-card/40 border border-border flex items-center justify-center shadow-[0_0_40px_rgba(220,38,38,0.3)]">
+            <Image
+              src="/cyberclub-optimized.png"
+              alt="Cyber Club logo"
+              width={112}
+              height={112}
+              className="h-full w-full object-contain"
+              priority
+            />
           </div>
           <span className="absolute -bottom-1 -right-1 inline-flex items-center justify-center rounded-full bg-card border border-border p-1.5">
-            <Lock className="h-3.5 w-3.5 text-muted-foreground" />
+            <Lock className="h-3.5 w-3.5 text-red-500" />
           </span>
         </motion.div>
 
@@ -48,8 +56,8 @@ export function Hero() {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="font-mono text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight"
         >
-          <span className="text-foreground">Cyber Club</span>{' '}
-          <span className="text-red-500">Launch</span>
+          <span className="text-foreground">Cyber</span>{' '}
+          <span className="text-red-500">Club</span>
         </motion.h1>
 
         <motion.p
@@ -84,12 +92,6 @@ export function Hero() {
             <Link href="/register">
               <Shield className="h-5 w-5" />
               Register for Event
-            </Link>
-          </Button>
-          <Button asChild size="lg" variant="outline" className="w-full sm:w-auto h-12 px-6 text-base">
-            <Link href="/admin/login">
-              Admin Dashboard
-              <ChevronRight className="h-4 w-4" />
             </Link>
           </Button>
         </motion.div>

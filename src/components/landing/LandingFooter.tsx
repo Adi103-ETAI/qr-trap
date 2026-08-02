@@ -1,8 +1,9 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Shield, Terminal } from 'lucide-react';
+import { Terminal } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 
 export function LandingFooter() {
@@ -17,8 +18,14 @@ export function LandingFooter() {
           className="flex flex-col sm:flex-row items-center justify-between gap-6"
         >
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-red-600 to-red-800 flex items-center justify-center">
-              <Shield className="h-5 w-5 text-white" />
+            <div className="h-10 w-10 rounded-lg overflow-hidden bg-card/40 border border-border flex items-center justify-center">
+              <Image
+                src="/cyberclub-optimized.png"
+                alt="Cyber Club logo"
+                width={40}
+                height={40}
+                className="h-full w-full object-contain"
+              />
             </div>
             <div>
               <p className="font-mono font-bold text-foreground">CYBER CLUB</p>

@@ -14,9 +14,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Cyber Club Launch — Awareness Simulation",
+  title: "Cyber Club — Awareness Simulation",
   description:
-    "A controlled cybersecurity awareness exercise for the Cyber Club launch event. Stay vigilant. Stop. Think. Verify.",
+    "A controlled cybersecurity awareness exercise by Cyber Club. Stay vigilant. Stop. Think. Verify.",
   keywords: [
     "cybersecurity",
     "awareness",
@@ -27,6 +27,10 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "Cyber Club" }],
   robots: { index: false, follow: false },
+  icons: {
+    icon: "/cyberclub-optimized.png",
+    apple: "/cyberclub-optimized.png",
+  },
 };
 
 export default function RootLayout({
