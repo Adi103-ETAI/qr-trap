@@ -187,12 +187,8 @@ export async function submitDepartment(formData: FormData): Promise<void> {
   if (!result.success) {
     redirect('/register/details?error=' + encodeURIComponent(result.error ?? 'unknown'));
   }
-  // Clear the demo session cookie on success (no-op for NextAuth sessions).
-  try {
-    const store = await cookies();
-    store.delete(DEMO_SESSION_COOKIE);
-  } catch {
-    // ignore
-  }
+  // NOTE: We intentionally do NOT clear the demo session cookie here.
+  // The /dashboard page reads it to look up the participant record.
+  // The cookie has a 10-minute TTL and will expire naturally.
   redirect('/dashboard');
 }
