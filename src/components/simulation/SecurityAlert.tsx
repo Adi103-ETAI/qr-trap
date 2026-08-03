@@ -41,7 +41,7 @@ function generateExfilData(): ExfilItem[] {
       suffix: ' images',
       detail: 'Camera roll, screenshots, downloads',
       delay: 0,
-      countDuration: 2000,
+      countDuration: 3500,
     },
     {
       icon: KeyRound,
@@ -50,7 +50,7 @@ function generateExfilData(): ExfilItem[] {
       suffix: ' credentials',
       detail: 'gmail.com, accounts.google.com',
       delay: 300,
-      countDuration: 800,
+      countDuration: 1500,
     },
     {
       icon: KeyRound,
@@ -59,7 +59,7 @@ function generateExfilData(): ExfilItem[] {
       suffix: ' credentials',
       detail: 'instagram.com',
       delay: 600,
-      countDuration: 600,
+      countDuration: 1200,
     },
     {
       icon: KeyRound,
@@ -68,7 +68,7 @@ function generateExfilData(): ExfilItem[] {
       suffix: ' credentials',
       detail: 'snapchat.com',
       delay: 900,
-      countDuration: 600,
+      countDuration: 1000,
     },
     {
       icon: KeyRound,
@@ -77,16 +77,7 @@ function generateExfilData(): ExfilItem[] {
       suffix: ' credentials',
       detail: 'spotify.com',
       delay: 1100,
-      countDuration: 600,
-    },
-    {
-      icon: KeyRound,
-      label: 'Netflix passwords',
-      value: rand(1, 2),
-      suffix: ' credentials',
-      detail: 'netflix.com',
-      delay: 1300,
-      countDuration: 600,
+      countDuration: 1000,
     },
     {
       icon: KeyRound,
@@ -98,22 +89,13 @@ function generateExfilData(): ExfilItem[] {
       countDuration: 700,
     },
     {
-      icon: KeyRound,
-      label: 'Amazon passwords',
-      value: rand(1, 3),
-      suffix: ' credentials',
-      detail: 'amazon.in, amazon.com',
-      delay: 1700,
-      countDuration: 600,
-    },
-    {
       icon: MessageCircle,
       label: 'Messages',
       value: rand(1800, 9200),
       suffix: ' chats',
       detail: 'WhatsApp, Telegram, SMS',
-      delay: 1900,
-      countDuration: 1800,
+      delay: 1700,
+      countDuration: 3000,
     },
     {
       icon: FileText,
@@ -121,8 +103,8 @@ function generateExfilData(): ExfilItem[] {
       value: rand(80, 420),
       suffix: ' files',
       detail: 'PDFs, docs, spreadsheets',
-      delay: 2100,
-      countDuration: 1200,
+      delay: 1900,
+      countDuration: 2500,
     },
   ];
 }
@@ -255,45 +237,64 @@ export function SecurityAlert({ token }: Props) {
       navigator.vibrate([200, 100, 200, 100, 200, 100, 200, 100, 200]);
     }
 
-    // Play alarm sound using Web Audio API (no external file needed)
+    // Play alarm sound continuously using Web Audio API (no external file).
+    // Loops a 3-beep pattern every 1.5s until the component unmounts
+    // (i.e., until the host clicks REVEAL or the participant closes the tab).
     try {
       const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
       const ctx = new AudioCtx();
       audioCtxRef.current = ctx;
 
-      const oscillator = ctx.createOscillator();
-      const gainNode = ctx.createGain();
+      const playBeepSequence = () => {
+        const now = ctx.currentTime;
+        const oscillator = ctx.createOscillator();
+        const gainNode = ctx.createGain();
 
-      oscillator.connect(gainNode);
-      gainNode.connect(ctx.destination);
+        oscillator.connect(gainNode);
+        gainNode.connect(ctx.destination);
 
-      oscillator.type = 'sawtooth';
-      oscillator.frequency.setValueAtTime(880, ctx.currentTime); // A5
+        oscillator.type = 'sawtooth';
+        oscillator.frequency.setValueAtTime(880, now); // A5
 
-      // Beep pattern: 3 short beeps
-      gainNode.gain.setValueAtTime(0, ctx.currentTime);
-      gainNode.gain.linearRampToValueAtTime(0.15, ctx.currentTime + 0.05);
-      gainNode.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.3);
-      gainNode.gain.linearRampToValueAtTime(0.15, ctx.currentTime + 0.4);
-      gainNode.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.65);
-      gainNode.gain.linearRampToValueAtTime(0.15, ctx.currentTime + 0.75);
-      gainNode.gain.linearRampToValueAtTime(0, ctx.currentTime + 1.0);
+        // 3 short beeps over 1.0s, then 0.5s silence (total 1.5s loop)
+        gainNode.gain.setValueAtTime(0, now);
+        gainNode.gain.linearRampToValueAtTime(0.15, now + 0.05);
+        gainNode.gain.linearRampToValueAtTime(0, now + 0.2);
+        gainNode.gain.linearRampToValueAtTime(0.15, now + 0.3);
+        gainNode.gain.linearRampToValueAtTime(0, now + 0.45);
+        gainNode.gain.linearRampToValueAtTime(0.15, now + 0.55);
+        gainNode.gain.linearRampToValueAtTime(0, now + 0.7);
 
-      oscillator.start(ctx.currentTime);
-      oscillator.stop(ctx.currentTime + 1.1);
+        oscillator.start(now);
+        oscillator.stop(now + 0.8);
+      };
 
-      audioRef.current = oscillator;
+      // Play immediately, then repeat every 1.5s forever
+      playBeepSequence();
+      const intervalId = setInterval(playBeepSequence, 1500);
+
+      // Store interval ID for cleanup
+      audioRef.current = { stop: () => clearInterval(intervalId) } as unknown as AudioBufferSourceNode;
     } catch (err) {
       console.warn('[audio] could not play alarm:', err);
     }
 
+    // Also re-trigger vibration every 2s (mobile only)
+    let vibrateInterval: NodeJS.Timeout | null = null;
+    if ('vibrate' in navigator) {
+      vibrateInterval = setInterval(() => {
+        navigator.vibrate([200, 100, 200, 100, 200]);
+      }, 2000);
+    }
+
     return () => {
       if (audioRef.current) {
-        try { audioRef.current.stop(); } catch { /* already stopped */ }
+        try { (audioRef.current as unknown as { stop: () => void }).stop(); } catch { /* already stopped */ }
       }
       if (audioCtxRef.current) {
         try { audioCtxRef.current.close(); } catch { /* already closed */ }
       }
+      if (vibrateInterval) clearInterval(vibrateInterval);
     };
   }, []);
 
