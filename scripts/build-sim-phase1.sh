@@ -1,3 +1,13 @@
+#!/bin/bash
+set -e
+cd /home/z/my-project
+
+echo "=== Checkout club-o1 ==="
+git checkout club-o1 2>&1 | tail -1
+git branch --show-current
+
+echo "=== Add sendWelcomeEmail to email service ==="
+cat > src/lib/email/send.ts << 'EMAILEOF'
 import { db } from '@/lib/db';
 import type { EmailLog } from '@/types/database';
 
@@ -227,3 +237,69 @@ export async function getRecentEmailLogs(limit = 25): Promise<EmailLog[]> {
   });
   return rows as unknown as EmailLog[];
 }
+EMAILEOF
+echo "OK: email service updated"
+
+echo "=== Add welcome email trigger to completeRegistration ==="
+python3 << 'PYEOF'
+with open('src/app/register/actions.ts') as f:
+    c = f.read()
+
+# Add import for sendWelcomeEmail
+old_import = "import { generateToken, hashToken } from '@/lib/simulation/tokens';"
+new_import = """import { generateToken, hashToken } from '@/lib/simulation/tokens';
+import { sendWelcomeEmail } from '@/lib/email/send';"""
+
+if old_import in c and 'sendWelcomeEmail' not in c:
+    c = c.replace(old_import, new_import)
+
+# Find the completeRegistration function and add welcome email after event creation
+# Look for the pattern: simulationEvent.create ... return { success: true }
+old_block = """    await db.simulationEvent.create({
+      data: {
+        participantId: created.id,
+        eventType: 'registered',
+        metadata: JSON.stringify({
+          provider: session.authUserId.startsWith('demo:') ? 'demo' : 'google',
+          department,
+        }),
+      },
+    });
+
+    return { success: true };"""
+
+new_block = """    await db.simulationEvent.create({
+      data: {
+        participantId: created.id,
+        eventType: 'registered',
+        metadata: JSON.stringify({
+          provider: session.authUserId.startsWith('demo:') ? 'demo' : 'google',
+          department,
+        }),
+      },
+    });
+
+    // Send welcome email (fire-and-forget — don't block registration on email)
+    void sendWelcomeEmail({
+      to: session.email,
+      name: session.name,
+      participantId: created.id,
+    }).catch((err) => console.error('[welcome-email] failed:', err));
+
+    return { success: true };"""
+
+if old_block in c:
+    c = c.replace(old_block, new_block)
+    with open('src/app/register/actions.ts', 'w') as f:
+        f.write(c)
+    print('OK: welcome email trigger added')
+else:
+    print('WARN: completeRegistration block not found (may already have welcome email)')
+    # Check if it's already there
+    if 'sendWelcomeEmail' in c:
+        print('  -> sendWelcomeEmail already present')
+    with open('src/app/register/actions.ts', 'w') as f:
+        f.write(c)
+PYEOF
+
+echo "=== Done with email changes ==="

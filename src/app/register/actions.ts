@@ -2,6 +2,7 @@
 
 import { db } from '@/lib/db';
 import { generateToken, hashToken } from '@/lib/simulation/tokens';
+import { sendWelcomeEmail } from '@/lib/email/send';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
@@ -120,6 +121,13 @@ export async function completeRegistration(
         }),
       },
     });
+
+    // Send welcome email (fire-and-forget — don't block registration on email)
+    void sendWelcomeEmail({
+      to: session.email,
+      name: session.name,
+      participantId: created.id,
+    }).catch((err) => console.error('[welcome-email] failed:', err));
 
     return { success: true };
   } catch (err) {
