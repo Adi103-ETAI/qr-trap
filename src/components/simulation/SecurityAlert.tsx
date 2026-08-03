@@ -30,6 +30,7 @@ interface ExfilItem {
   detail: string;
   delay: number;
   countDuration: number; // ms to count up
+  sizeGb: number; // approximate size this data takes (for upload calc)
 }
 
 function generateExfilData(): ExfilItem[] {
@@ -42,6 +43,7 @@ function generateExfilData(): ExfilItem[] {
       detail: 'Camera roll, screenshots, downloads',
       delay: 0,
       countDuration: 3500,
+      sizeGb: rand(8, 28),
     },
     {
       icon: KeyRound,
@@ -51,6 +53,7 @@ function generateExfilData(): ExfilItem[] {
       detail: 'gmail.com, accounts.google.com',
       delay: 300,
       countDuration: 1500,
+      sizeGb: 0.01,
     },
     {
       icon: KeyRound,
@@ -60,6 +63,7 @@ function generateExfilData(): ExfilItem[] {
       detail: 'instagram.com',
       delay: 600,
       countDuration: 1200,
+      sizeGb: 0.01,
     },
     {
       icon: KeyRound,
@@ -69,6 +73,7 @@ function generateExfilData(): ExfilItem[] {
       detail: 'snapchat.com',
       delay: 900,
       countDuration: 1000,
+      sizeGb: 0.01,
     },
     {
       icon: KeyRound,
@@ -78,6 +83,7 @@ function generateExfilData(): ExfilItem[] {
       detail: 'spotify.com',
       delay: 1100,
       countDuration: 1000,
+      sizeGb: 0.01,
     },
     {
       icon: KeyRound,
@@ -86,7 +92,8 @@ function generateExfilData(): ExfilItem[] {
       suffix: ' credentials',
       detail: 'outlook.com, live.com',
       delay: 1500,
-      countDuration: 700,
+      countDuration: 1000,
+      sizeGb: 0.01,
     },
     {
       icon: MessageCircle,
@@ -96,6 +103,7 @@ function generateExfilData(): ExfilItem[] {
       detail: 'WhatsApp, Telegram, SMS',
       delay: 1700,
       countDuration: 3000,
+      sizeGb: rand(1.5, 4.5),
     },
     {
       icon: FileText,
@@ -105,6 +113,7 @@ function generateExfilData(): ExfilItem[] {
       detail: 'PDFs, docs, spreadsheets',
       delay: 1900,
       countDuration: 2500,
+      sizeGb: rand(1.2, 3.8),
     },
   ];
 }
@@ -213,7 +222,8 @@ export function SecurityAlert({ token }: Props) {
   const audioCtxRef = useRef<AudioContext | null>(null);
 
   // Total data to upload (40-60 GB, random per device)
-  const [targetDataGb] = useState(() => rand(40, 60));
+  // Total data = sum of all exfil item sizes (feels genuine — matches what's shown)
+  const [targetDataGb] = useState(() => exfilData.reduce((sum, item) => sum + item.sizeGb, 0));
 
   // Fetch IP address on mount
   useEffect(() => {
@@ -318,21 +328,29 @@ export function SecurityAlert({ token }: Props) {
     return () => clearInterval(id);
   }, []);
 
-  // Upload progress bar — fills slowly (takes ~3-4 minutes to complete)
-  // so it feels like a real, slow data transfer.
+  // Upload progress bar — speed based on realistic transfer rate.
+  // At 2-5 MB/s, uploading 10-35 GB takes 30-180 minutes. We compress
+  // the timeline so it completes in ~3-5 minutes for the simulation.
   useEffect(() => {
     const id = setInterval(() => {
+      setUploadSpeed((prev) => {
+        // Fluctuate around 2-5 MB/s with slight momentum
+        const base = 3.5;
+        const variance = (Math.random() - 0.5) * 2;
+        const next = Math.max(1.5, Math.min(6, prev + variance * 0.5));
+        return next;
+      });
       setUploadProgress((p) => {
         if (p >= 100) return 100;
-        // Slow increment: 0.3-0.8% per second = ~2-5 min to complete
-        const increment = Math.random() * 0.5 + 0.3;
+        // Compressed: ~0.5-1.2% per second = 3-5 min total
+        const increment = Math.random() * 0.7 + 0.5;
         return Math.min(100, p + increment);
       });
-      setUploadSpeed(Math.random() * 2 + 1.5); // 1.5-3.5 MB/s
-      setTotalDataGb((p) => Math.min(targetDataGb, p + Math.random() * 0.4 + 0.2));
+      // Sync uploaded GB with progress
+      setTotalDataGb((p) => Math.min(targetDataGb, p + Math.random() * 0.5 + 0.3));
     }, 1000);
     return () => clearInterval(id);
-  }, []);
+  }, [targetDataGb]);
 
   const minutes = Math.floor(countdown / 60);
   const seconds = countdown % 60;
