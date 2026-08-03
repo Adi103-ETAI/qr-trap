@@ -4,11 +4,6 @@ import { motion } from 'framer-motion';
 import {
   ShieldCheck,
   CheckCircle2,
-  Flame,
-  Zap,
-  BadgeAlert,
-  Fingerprint,
-  HelpCircle,
   Hand,
 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
@@ -17,35 +12,7 @@ const REASSURANCES = [
   'No password was collected.',
   'No device was accessed.',
   'No account was compromised.',
-  'What you experienced was a demonstration of social engineering.',
-];
-
-const VECTORS = [
-  {
-    icon: Flame,
-    name: 'Fear',
-    desc: 'The red alert and HIGH RISK badge were designed to make you feel threatened — fear narrows your focus.',
-  },
-  {
-    icon: Zap,
-    name: 'Urgency',
-    desc: '“Immediate review is required” pressured you to click before verifying the source.',
-  },
-  {
-    icon: BadgeAlert,
-    name: 'Authority',
-    desc: 'Official-looking branding, monospace fonts, and a serious tone mimicked a trusted security service.',
-  },
-  {
-    icon: Fingerprint,
-    name: 'Personalization',
-    desc: 'The page referenced your recent event registration, making the alert feel targeted and real.',
-  },
-  {
-    icon: HelpCircle,
-    name: 'Curiosity',
-    desc: '“Unusual activity detected” invited you to click to find out what had happened.',
-  },
+  'What you experienced was a controlled demonstration.',
 ];
 
 export function SimulationReveal() {
@@ -113,31 +80,6 @@ export function SimulationReveal() {
               ))}
             </div>
 
-            {/* Attackers often use */}
-            <div>
-              <h2 className="font-semibold text-foreground mb-3 flex items-center gap-2">
-                <BadgeAlert className="h-5 w-5 text-amber-500" />
-                Attackers often use:
-              </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
-                {VECTORS.map((v, i) => (
-                  <motion.div
-                    key={v.name}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3, delay: 0.4 + i * 0.06 }}
-                    className="rounded-lg border border-border bg-background/40 p-3"
-                  >
-                    <div className="flex items-center gap-2 mb-1.5">
-                      <v.icon className="h-4 w-4 text-amber-500" />
-                      <span className="font-mono font-semibold text-sm text-foreground">{v.name}</span>
-                    </div>
-                    <p className="text-xs text-muted-foreground leading-relaxed">{v.desc}</p>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-
             {/* STOP THINK VERIFY callout */}
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
@@ -156,24 +98,6 @@ export function SimulationReveal() {
                 channel before clicking, calling, or entering credentials.
               </p>
             </motion.div>
-
-            {/* Educational paragraph */}
-            <div className="rounded-lg border border-border bg-background/40 p-4">
-              <h3 className="font-semibold text-foreground mb-2 text-sm">About phishing & social engineering</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                Phishing is the practice of sending fraudulent communications
-                that appear to come from a reputable source, usually via
-                email. The goal is to steal sensitive data, install malware,
-                or trick you into taking an action you otherwise wouldn't.
-                Social engineering is the broader human-manipulation
-                playbook phishing relies on — exploiting fear, urgency,
-                authority, personalisation, and curiosity. The single most
-                effective defence is to pause before reacting: read the
-                sender address, hover over links before clicking, and when
-                in doubt, contact the organisation directly through a
-                verified channel. You are the last line of defence.
-              </p>
-            </div>
 
             <p className="text-center text-sm text-muted-foreground font-mono">
               Brought to you by <span className="text-foreground font-bold">Cyber Club</span>. Stay vigilant.
