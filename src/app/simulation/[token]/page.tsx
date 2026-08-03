@@ -1,11 +1,8 @@
-import { notFound } from 'next/navigation';
-import Link from 'next/link';
 import { db } from '@/lib/db';
 import { hashToken, isValidTokenFormat } from '@/lib/simulation/tokens';
 import { getSimulationStatus } from '@/lib/simulation/state';
 import { SimulationClient } from '@/components/simulation/SimulationClient';
-import { Button } from '@/components/ui/button';
-import { ShieldX, ChevronLeft } from 'lucide-react';
+import { ShieldX } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -35,21 +32,10 @@ export default async function SimulationPage({ params }: Props) {
   const initialStatus =
     status === 'revealed' ? 'revealed' : status === 'launched' ? 'launched' : 'idle';
 
+  // No header, no back button, no navigation — participants can't leave.
+  // The SimulationClient takes over the full viewport.
   return (
     <main className="flex-1 flex flex-col cyber-grid">
-      {/* Minimal top bar — keep the page immersive */}
-      <header className="border-b border-border">
-        <div className="mx-auto max-w-5xl px-4 sm:px-6 h-12 flex items-center justify-between">
-          <Link href="/" className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground">
-            <ChevronLeft className="h-3.5 w-3.5" />
-            Cyber Club
-          </Link>
-          <span className="font-mono text-[10px] text-muted-foreground/60 uppercase tracking-wider">
-            Secure Session · ref {token.slice(0, 6)}
-          </span>
-        </div>
-      </header>
-
       <SimulationClient token={token} initialStatus={initialStatus} participantName={participant.name} />
     </main>
   );
@@ -68,9 +54,6 @@ function InvalidLink() {
           the link was truncated, altered, or already expired. Please use
           the link from your security notification email.
         </p>
-        <Button asChild variant="outline">
-          <Link href="/">Return to landing</Link>
-        </Button>
       </div>
     </main>
   );

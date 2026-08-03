@@ -6,7 +6,6 @@ import { subscribeToSimulation } from '@/lib/realtime/client';
 import { SecurityAlert } from './SecurityAlert';
 import { SimulationReveal } from './SimulationReveal';
 import { SimulationIdle } from './SimulationIdle';
-import { Loader2, WifiOff } from 'lucide-react';
 
 type View = 'idle' | 'blackout' | 'launched' | 'revealed';
 
@@ -18,8 +17,6 @@ interface Props {
 
 export function SimulationClient({ token, initialStatus, participantName }: Props) {
   const [view, setView] = useState<View>(initialStatus);
-  const [clicked, setClicked] = useState(false);
-  const [socketConnected, setSocketConnected] = useState<boolean | null>(null);
   const lastStatusRef = useRef<View>(initialStatus);
 
   // Fire "opened" event once on mount.
@@ -57,9 +54,7 @@ export function SimulationClient({ token, initialStatus, participantName }: Prop
       () => transitionTo('revealed'),
       () => transitionTo('launched'),
     );
-    const t = setTimeout(() => setSocketConnected(sub.isConnected()), 1500);
     return () => {
-      clearTimeout(t);
       sub.cleanup();
     };
   }, []);
@@ -94,41 +89,19 @@ export function SimulationClient({ token, initialStatus, participantName }: Prop
     };
   }, [token, view]);
 
-  const handleClick = async () => {
-    setClicked(true);
-    try {
-      await fetch('/api/simulation/clicked', {
+  // Fire 'clicked' event when the alert page appears (no button anymore).
+  useEffect(() => {
+    if (view === 'launched') {
+      fetch('/api/simulation/clicked', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token }),
-      });
-    } catch (err) {
-      console.warn('[clicked] failed:', err);
+      }).catch((err) => console.warn('[clicked] failed:', err));
     }
-  };
+  }, [view, token]);
 
   return (
     <div className="relative">
-      {/* Connection indicator (subtle, top-right) — hidden during blackout */}
-      {view !== 'blackout' && (
-        <div className="fixed top-3 right-3 z-50 hidden sm:block">
-          <div className="flex items-center gap-1.5 rounded-full border border-border bg-card/80 backdrop-blur px-2.5 py-1 text-[10px] font-mono text-muted-foreground">
-            {socketConnected === null ? (
-              <Loader2 className="h-3 w-3 animate-spin" />
-            ) : socketConnected ? (
-              <>
-                <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                LIVE
-              </>
-            ) : (
-              <>
-                <WifiOff className="h-3 w-3 text-amber-500" />
-                POLLING
-              </>
-            )}
-          </div>
-        </div>
-      )}
 
       <AnimatePresence mode="wait">
         {view === 'idle' && (
@@ -139,8 +112,8 @@ export function SimulationClient({ token, initialStatus, participantName }: Prop
           <SecurityAlert
             key="launched"
             token={token}
-            clicked={clicked}
-            onClicked={handleClick}
+            onClicked={() => {}}
+            clicked={false}
           />
         )}
         {view === 'revealed' && <SimulationReveal key="revealed" />}
