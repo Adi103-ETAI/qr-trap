@@ -1,25 +1,36 @@
 import { db } from '@/lib/db';
 import type { EmailLog } from '@/types/database';
+import { Resend } from 'resend';
 
 /**
- * Email service for the Cyber Club awareness simulation.
+ * Email service using Resend.
  *
  * Two email types:
  *  1. Welcome email — sent immediately after registration. Clean, friendly.
- *     No simulation link, no urgency.
  *  2. Simulation email — sent when admin clicks "Launch". Contains the
  *     /simulation/[token] link that triggers the fake alert page.
  *
- * PRODUCTION MIGRATION
- * --------------------
- * Replace the bodies of both functions with Resend SDK calls. The
- * signatures stay the same. See README for the exact snippet.
+ * All emails are also logged to the EmailLog table for admin visibility.
  *
- * SANDBOX NOTE: The raw token is stored in EmailLog.tokenUsed for admin
- * demo visibility. In production, do NOT store the raw token.
+ * SENDER:
+ *  - For testing: 'onboarding@resend.dev' (Resend's free testing domain)
+ *  - For production: 'Cyber Club <no-reply@yourdomain.com>' (requires
+ *    domain verification in Resend dashboard)
+ *
+ * Set RESEND_FROM_EMAIL in .env to control the sender.
  */
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000';
+const RESEND_API_KEY = process.env.RESEND_API_KEY;
+const FROM_EMAIL = process.env.RESEND_FROM_EMAIL ?? 'Cyber Club <onboarding@resend.dev>';
+
+// Initialize Resend client only if API key is present.
+// If no key, we fall back to mock mode (console.log + EmailLog only).
+const resend = RESEND_API_KEY ? new Resend(RESEND_API_KEY) : null;
+
+if (!resend) {
+  console.warn('[email-service] RESEND_API_KEY not set — running in mock mode. Emails will be logged but not actually sent.');
+}
 
 // ============================================================================
 // 1. Welcome email
@@ -89,29 +100,61 @@ export async function sendWelcomeEmail(args: WelcomeEmailArgs): Promise<EmailRes
   const text = buildWelcomeText(name);
 
   try {
+    // Send via Resend if configured, otherwise mock
+    if (resend) {
+      const { error } = await resend.emails.send({
+        from: FROM_EMAIL,
+        to,
+        subject: WELCOME_SUBJECT,
+        html,
+        text,
+      });
+      if (error) {
+        throw new Error(error.message);
+      }
+    }
+
+    // Persist to EmailLog
     const log = await db.emailLog.create({
       data: {
         participantId,
         toEmail: to,
         subject: WELCOME_SUBJECT,
         body: html,
-        tokenUsed: '', // No token for welcome email
+        tokenUsed: '',
         status: 'sent',
       },
     });
 
     console.log(
-      `[email-service] MOCK SEND (welcome)\n` +
+      `[email-service] ${resend ? 'SENT' : 'MOCK'} (welcome)\n` +
         `  to: ${to}\n` +
         `  subject: ${WELCOME_SUBJECT}\n` +
-        `  log_id: ${log.id}\n` +
-        `  --- text body ---\n${text}\n  --- end ---`,
+        `  from: ${FROM_EMAIL}\n` +
+        `  log_id: ${log.id}`,
     );
 
     return { success: true, emailLogId: log.id };
   } catch (err) {
     const message = err instanceof Error ? err.message : 'unknown error';
     console.error('[email-service] welcome email failed:', message);
+
+    // Persist failed attempt
+    try {
+      await db.emailLog.create({
+        data: {
+          participantId,
+          toEmail: to,
+          subject: WELCOME_SUBJECT,
+          body: html,
+          tokenUsed: '',
+          status: 'failed',
+          error: message,
+        },
+      });
+    } catch {
+      /* swallow nested errors */
+    }
     return { success: false, error: message };
   }
 }
@@ -176,6 +219,21 @@ export async function sendSimulationEmail(args: SimulationEmailArgs): Promise<Em
   const text = buildSimText(name ?? null, url);
 
   try {
+    // Send via Resend if configured, otherwise mock
+    if (resend) {
+      const { error } = await resend.emails.send({
+        from: FROM_EMAIL,
+        to,
+        subject: SIM_SUBJECT,
+        html,
+        text,
+      });
+      if (error) {
+        throw new Error(error.message);
+      }
+    }
+
+    // Persist to EmailLog
     const log = await db.emailLog.create({
       data: {
         participantId,
@@ -188,18 +246,19 @@ export async function sendSimulationEmail(args: SimulationEmailArgs): Promise<Em
     });
 
     console.log(
-      `[email-service] MOCK SEND (simulation)\n` +
+      `[email-service] ${resend ? 'SENT' : 'MOCK'} (simulation)\n` +
         `  to: ${to}\n` +
         `  subject: ${SIM_SUBJECT}\n` +
+        `  from: ${FROM_EMAIL}\n` +
         `  simulation_url: ${url}\n` +
-        `  log_id: ${log.id}\n` +
-        `  --- text body ---\n${text}\n  --- end ---`,
+        `  log_id: ${log.id}`,
     );
 
     return { success: true, emailLogId: log.id };
   } catch (err) {
     const message = err instanceof Error ? err.message : 'unknown error';
     console.error('[email-service] simulation email failed:', message);
+
     try {
       await db.emailLog.create({
         data: {
