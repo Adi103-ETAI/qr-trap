@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
-import { AlertOctagon, ShieldAlert, Image, KeyRound, MessageCircle, CreditCard, FileText, Wifi } from 'lucide-react';
+import { AlertOctagon, ShieldAlert, Image, KeyRound, MessageCircle, FileText, Upload, Wifi } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 
@@ -13,8 +13,9 @@ interface Props {
 }
 
 // ============================================================================
-// Fake exfiltration data — shown as bold readable cards (not a terminal).
-// Numbers are randomized on each page load to feel "real" but are
+// Fake exfiltration data — shown as bold readable cards.
+// Numbers COUNT UP from 0 to the final value for maximum psychological
+// impact. Numbers are randomized on each page load (per device) but are
 // COMPLETELY FAKE. No real data is accessed, collected, or transmitted.
 // ============================================================================
 function rand(min: number, max: number): number {
@@ -24,9 +25,11 @@ function rand(min: number, max: number): number {
 interface ExfilItem {
   icon: typeof Image;
   label: string;
-  value: string;
-  detail?: string;
+  value: number;
+  suffix: string;
+  detail: string;
   delay: number;
+  countDuration: number; // ms to count up
 }
 
 function generateExfilData(): ExfilItem[] {
@@ -34,65 +37,129 @@ function generateExfilData(): ExfilItem[] {
     {
       icon: Image,
       label: 'Photos',
-      value: `${rand(1200, 8400).toLocaleString()} images`,
+      value: rand(3200, 12400),
+      suffix: ' images',
       detail: 'Camera roll, screenshots, downloads',
       delay: 0,
+      countDuration: 2000,
     },
     {
       icon: KeyRound,
       label: 'Google passwords',
-      value: `${rand(45, 180)} credentials`,
+      value: rand(5, 15),
+      suffix: ' credentials',
       detail: 'gmail.com, accounts.google.com',
-      delay: 400,
+      delay: 300,
+      countDuration: 800,
     },
     {
       icon: KeyRound,
       label: 'Instagram passwords',
-      value: `${rand(1, 4)} credentials`,
+      value: rand(1, 3),
+      suffix: ' credentials',
       detail: 'instagram.com',
-      delay: 800,
+      delay: 600,
+      countDuration: 600,
     },
     {
       icon: KeyRound,
       label: 'Snapchat passwords',
-      value: `${rand(1, 3)} credentials`,
+      value: rand(1, 2),
+      suffix: ' credentials',
       detail: 'snapchat.com',
-      delay: 1200,
+      delay: 900,
+      countDuration: 600,
+    },
+    {
+      icon: KeyRound,
+      label: 'Spotify passwords',
+      value: rand(1, 2),
+      suffix: ' credentials',
+      detail: 'spotify.com',
+      delay: 1100,
+      countDuration: 600,
+    },
+    {
+      icon: KeyRound,
+      label: 'Netflix passwords',
+      value: rand(1, 2),
+      suffix: ' credentials',
+      detail: 'netflix.com',
+      delay: 1300,
+      countDuration: 600,
+    },
+    {
+      icon: KeyRound,
+      label: 'Microsoft passwords',
+      value: rand(2, 6),
+      suffix: ' credentials',
+      detail: 'outlook.com, live.com',
+      delay: 1500,
+      countDuration: 700,
+    },
+    {
+      icon: KeyRound,
+      label: 'Amazon passwords',
+      value: rand(1, 3),
+      suffix: ' credentials',
+      detail: 'amazon.in, amazon.com',
+      delay: 1700,
+      countDuration: 600,
     },
     {
       icon: MessageCircle,
       label: 'Messages',
-      value: `${rand(2000, 9500).toLocaleString()} chats`,
+      value: rand(1800, 9200),
+      suffix: ' chats',
       detail: 'WhatsApp, Telegram, SMS',
-      delay: 1600,
+      delay: 1900,
+      countDuration: 1800,
     },
     {
       icon: FileText,
       label: 'Documents',
-      value: `${rand(80, 420)} files`,
+      value: rand(80, 420),
+      suffix: ' files',
       detail: 'PDFs, docs, spreadsheets',
-      delay: 2000,
-    },
-    {
-      icon: CreditCard,
-      label: 'Payment methods',
-      value: `${rand(2, 9)} cards`,
-      detail: 'Visa, Mastercard, UPI',
-      delay: 2400,
-    },
-    {
-      icon: KeyRound,
-      label: 'Banking sessions',
-      value: `${rand(1, 5)} active`,
-      detail: 'HDFC, SBI, ICICI',
-      delay: 2800,
+      delay: 2100,
+      countDuration: 1200,
     },
   ];
 }
 
 // ============================================================================
-// Device info interface — only browser, OS, IP, last access.
-// Location and screen resolution are intentionally NOT shown.
+// Animated counter — counts up from 0 to target over `duration` ms.
+// ============================================================================
+function useCountUp(target: number, duration: number, start: boolean): number {
+  const [current, setCurrent] = useState(0);
+
+  useEffect(() => {
+    if (!start) return;
+    let raf: number;
+    const startTime = performance.now();
+
+    const tick = (now: number) => {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      // Ease-out cubic for a dramatic slowdown at the end
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setCurrent(Math.floor(eased * target));
+      if (progress < 1) {
+        raf = requestAnimationFrame(tick);
+      } else {
+        setCurrent(target);
+      }
+    };
+
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [target, duration, start]);
+
+  return current;
+}
+
+// ============================================================================
+// Device info — only browser, OS, IP, last access.
 // ============================================================================
 interface DeviceInfo {
   browser: string;
@@ -146,7 +213,10 @@ function parseDeviceInfo(): DeviceInfo {
   };
 }
 
-export function SecurityAlert({ token, onClicked, clicked }: Props) {
+// ============================================================================
+// Main component
+// ============================================================================
+export function SecurityAlert({ token }: Props) {
   const [deviceInfo, setDeviceInfo] = useState<DeviceInfo | null>(() => {
     if (typeof window === 'undefined') return null;
     return parseDeviceInfo();
@@ -154,6 +224,14 @@ export function SecurityAlert({ token, onClicked, clicked }: Props) {
   const [exfilData] = useState<ExfilItem[]>(() => generateExfilData());
   const [visibleItems, setVisibleItems] = useState<number>(0);
   const [countdown, setCountdown] = useState(300); // 5 minutes
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadSpeed, setUploadSpeed] = useState(2.3);
+  const [totalDataGb, setTotalDataGb] = useState(0);
+  const audioRef = useRef<AudioBufferSourceNode | null>(null);
+  const audioCtxRef = useRef<AudioContext | null>(null);
+
+  // Total data to upload (40-60 GB, random per device)
+  const [targetDataGb] = useState(() => rand(40, 60));
 
   // Fetch IP address on mount
   useEffect(() => {
@@ -167,6 +245,56 @@ export function SecurityAlert({ token, onClicked, clicked }: Props) {
       .catch(() => {
         // If IP fetch fails, keep the masked placeholder
       });
+  }, []);
+
+  // Vibrate + play alarm sound on mount
+  useEffect(() => {
+    // Vibrate (mobile only — ignored on desktop)
+    if ('vibrate' in navigator) {
+      // Pattern: vibrate 200ms, pause 100ms, repeat 5 times
+      navigator.vibrate([200, 100, 200, 100, 200, 100, 200, 100, 200]);
+    }
+
+    // Play alarm sound using Web Audio API (no external file needed)
+    try {
+      const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      const ctx = new AudioCtx();
+      audioCtxRef.current = ctx;
+
+      const oscillator = ctx.createOscillator();
+      const gainNode = ctx.createGain();
+
+      oscillator.connect(gainNode);
+      gainNode.connect(ctx.destination);
+
+      oscillator.type = 'sawtooth';
+      oscillator.frequency.setValueAtTime(880, ctx.currentTime); // A5
+
+      // Beep pattern: 3 short beeps
+      gainNode.gain.setValueAtTime(0, ctx.currentTime);
+      gainNode.gain.linearRampToValueAtTime(0.15, ctx.currentTime + 0.05);
+      gainNode.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.3);
+      gainNode.gain.linearRampToValueAtTime(0.15, ctx.currentTime + 0.4);
+      gainNode.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.65);
+      gainNode.gain.linearRampToValueAtTime(0.15, ctx.currentTime + 0.75);
+      gainNode.gain.linearRampToValueAtTime(0, ctx.currentTime + 1.0);
+
+      oscillator.start(ctx.currentTime);
+      oscillator.stop(ctx.currentTime + 1.1);
+
+      audioRef.current = oscillator;
+    } catch (err) {
+      console.warn('[audio] could not play alarm:', err);
+    }
+
+    return () => {
+      if (audioRef.current) {
+        try { audioRef.current.stop(); } catch { /* already stopped */ }
+      }
+      if (audioCtxRef.current) {
+        try { audioCtxRef.current.close(); } catch { /* already closed */ }
+      }
+    };
   }, []);
 
   // Reveal exfiltration items one by one
@@ -185,6 +313,22 @@ export function SecurityAlert({ token, onClicked, clicked }: Props) {
   useEffect(() => {
     const id = setInterval(() => {
       setCountdown((s) => (s > 0 ? s - 1 : 0));
+    }, 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  // Upload progress bar — fills slowly (takes ~3-4 minutes to complete)
+  // so it feels like a real, slow data transfer.
+  useEffect(() => {
+    const id = setInterval(() => {
+      setUploadProgress((p) => {
+        if (p >= 100) return 100;
+        // Slow increment: 0.3-0.8% per second = ~2-5 min to complete
+        const increment = Math.random() * 0.5 + 0.3;
+        return Math.min(100, p + increment);
+      });
+      setUploadSpeed(Math.random() * 2 + 1.5); // 1.5-3.5 MB/s
+      setTotalDataGb((p) => Math.min(targetDataGb, p + Math.random() * 0.4 + 0.2));
     }, 1000);
     return () => clearInterval(id);
   }, []);
@@ -258,7 +402,7 @@ export function SecurityAlert({ token, onClicked, clicked }: Props) {
               has been detected. Your data is being exfiltrated.
             </p>
 
-            {/* Device info panel — only browser, OS, IP, last access */}
+            {/* Device info panel */}
             {deviceInfo && (
               <div className="rounded-lg border border-red-500/30 bg-background/60 p-4">
                 <div className="flex items-center gap-2 mb-3 text-red-400">
@@ -286,7 +430,7 @@ export function SecurityAlert({ token, onClicked, clicked }: Props) {
               </p>
             </div>
 
-            {/* Data being exfiltrated — bold readable cards, not a terminal */}
+            {/* Data being exfiltrated — bold readable cards with counting numbers */}
             <div className="rounded-lg border border-red-500/40 bg-background/60 p-4">
               <div className="flex items-center gap-2 mb-3">
                 <AlertOctagon className="h-4 w-4 text-red-500" />
@@ -296,41 +440,41 @@ export function SecurityAlert({ token, onClicked, clicked }: Props) {
               </div>
               <div className="space-y-2">
                 {exfilData.map((item, i) => (
-                  <motion.div
+                  <ExfilCard
                     key={item.label}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={
-                      i < visibleItems
-                        ? { opacity: 1, x: 0 }
-                        : { opacity: 0, x: -20 }
-                    }
-                    transition={{ duration: 0.3 }}
-                    className={cn(
-                      'flex items-center gap-3 rounded-lg p-2.5',
-                      i < visibleItems
-                        ? 'bg-red-500/10 border border-red-500/30'
-                        : 'bg-background/30 border border-border/50',
-                    )}
-                  >
-                    <div className="shrink-0 h-8 w-8 rounded-lg bg-red-600/20 border border-red-500/40 flex items-center justify-center">
-                      <item.icon className="h-4 w-4 text-red-500" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-bold text-sm text-foreground">
-                        {item.label}
-                      </p>
-                      {item.detail && (
-                        <p className="text-xs text-muted-foreground">
-                          {item.detail}
-                        </p>
-                      )}
-                    </div>
-                    <p className="font-mono text-lg font-bold text-red-500 shrink-0">
-                      {i < visibleItems ? item.value : '...'}
-                    </p>
-                  </motion.div>
+                    item={item}
+                    visible={i < visibleItems}
+                  />
                 ))}
               </div>
+            </div>
+
+            {/* Upload to remote server — big data, slow transfer */}
+            <div className="rounded-lg border border-red-500/40 bg-background/60 p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <Upload className="h-4 w-4 text-red-500" />
+                <span className="font-mono text-xs uppercase tracking-wider text-red-400 font-bold">
+                  Uploading to remote server
+                </span>
+              </div>
+              <div className="flex items-center justify-between mb-2">
+                <span className="font-mono text-sm text-foreground">
+                  {totalDataGb.toFixed(1)} / {targetDataGb} GB
+                </span>
+                <span className="font-mono text-xs text-red-400">
+                  {uploadProgress.toFixed(0)}% · {uploadSpeed.toFixed(1)} MB/s
+                </span>
+              </div>
+              <div className="h-3 rounded-full bg-border overflow-hidden">
+                <motion.div
+                  className="h-full bg-red-500"
+                  animate={{ width: `${uploadProgress}%` }}
+                  transition={{ duration: 0.5 }}
+                />
+              </div>
+              <p className="font-mono text-[10px] text-muted-foreground/60 mt-1.5">
+                → 45.227.11.{rand(10, 250)}:8443 · encrypted channel
+              </p>
             </div>
           </div>
         </Card>
@@ -339,6 +483,44 @@ export function SecurityAlert({ token, onClicked, clicked }: Props) {
           ref: {token.slice(0, 8)}...{token.slice(-4)} · session active
         </p>
       </motion.div>
+    </motion.div>
+  );
+}
+
+// ============================================================================
+// ExfilCard — shows a card that counts up from 0 to the target value
+// ============================================================================
+function ExfilCard({ item, visible }: { item: ExfilItem; visible: boolean }) {
+  const current = useCountUp(item.value, item.countDuration, visible);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: -20 }}
+      animate={visible ? { opacity: 1, x: 0 } : { opacity: 0, x: -20 }}
+      transition={{ duration: 0.3 }}
+      className={cn(
+        'flex items-center gap-3 rounded-lg p-2.5',
+        visible
+          ? 'bg-red-500/10 border border-red-500/30'
+          : 'bg-background/30 border border-border/50',
+      )}
+    >
+      <div className="shrink-0 h-8 w-8 rounded-lg bg-red-600/20 border border-red-500/40 flex items-center justify-center">
+        <item.icon className="h-4 w-4 text-red-500" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="font-bold text-sm text-foreground">
+          {item.label}
+        </p>
+        {item.detail && (
+          <p className="text-xs text-muted-foreground">
+            {item.detail}
+          </p>
+        )}
+      </div>
+      <p className="font-mono text-lg font-bold text-red-500 shrink-0 tabular-nums">
+        {visible ? `${current.toLocaleString()}${item.suffix}` : '...'}
+      </p>
     </motion.div>
   );
 }
