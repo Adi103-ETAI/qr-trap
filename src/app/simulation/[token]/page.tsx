@@ -50,7 +50,7 @@ export default async function SimulationPage({ params }: Props) {
         </div>
       </header>
 
-      <SimulationClient token={token} initialStatus={initialStatus} />
+      <SimulationClient token={token} initialStatus={initialStatus} participantName={participant.name} />
     </main>
   );
 }
