@@ -119,6 +119,33 @@ export function AdminDashboardClient({
     }
   };
 
+  const onSendEmail = async (resend: boolean) => {
+    try {
+      const res = await fetch('/api/simulation/send-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ resend }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        toast({
+          variant: 'destructive',
+          title: 'Send email failed',
+          description: data.error || 'Unknown error',
+        });
+        return;
+      }
+      toast({
+        title: 'Emails sent',
+        description: `Sent: ${data.emailed ?? 0}, failed: ${data.failed ?? 0}${resend ? ' (resend to all)' : ''}`,
+      });
+      await refresh();
+    } catch (err) {
+      console.error(err);
+      toast({ variant: 'destructive', title: 'Network error' });
+    }
+  };
+
   return (
     <div className="flex-1 cyber-grid-fine">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 py-6 sm:py-8 space-y-6">
@@ -178,7 +205,7 @@ export function AdminDashboardClient({
         </div>
 
         {/* Controls */}
-        <SimulationControls status={stats.status} onAction={onAction} />
+        <SimulationControls status={stats.status} onAction={onAction} onSendEmail={onSendEmail} />
 
         {/* Activity + Emails */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
