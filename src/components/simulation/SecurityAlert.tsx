@@ -223,7 +223,7 @@ export function SecurityAlert({ token }: Props) {
 
   // Total data to upload (40-60 GB, random per device)
   // Total data = sum of all exfil item sizes (feels genuine — matches what's shown)
-  const [targetDataGb] = useState(() => exfilData.reduce((sum, item) => sum + item.sizeGb, 0));
+  const [targetDataGb] = useState(() => Math.round(exfilData.reduce((sum, item) => sum + item.sizeGb, 0) * 100) / 100);
 
   // Fetch IP address on mount
   useEffect(() => {
@@ -333,24 +333,27 @@ export function SecurityAlert({ token }: Props) {
   // the timeline so it completes in ~3-5 minutes for the simulation.
   useEffect(() => {
     const id = setInterval(() => {
-      setUploadSpeed((prev) => {
-        // Fluctuate around 2-5 MB/s with slight momentum
-        const base = 3.5;
-        const variance = (Math.random() - 0.5) * 2;
-        const next = Math.max(1.5, Math.min(6, prev + variance * 0.5));
-        return next;
-      });
       setUploadProgress((p) => {
         if (p >= 100) return 100;
         // Compressed: ~0.5-1.2% per second = 3-5 min total
         const increment = Math.random() * 0.7 + 0.5;
         return Math.min(100, p + increment);
       });
-      // Sync uploaded GB with progress
-      setTotalDataGb((p) => Math.min(targetDataGb, p + Math.random() * 0.5 + 0.3));
+      setUploadSpeed((prev) => {
+        // Stop fluctuating once upload completes
+        if (uploadProgress >= 100) return 0;
+        // Fluctuate around 2-5 MB/s with slight momentum
+        const variance = (Math.random() - 0.5) * 2;
+        return Math.max(1.5, Math.min(6, prev + variance * 0.5));
+      });
+      // Sync uploaded GB with progress (rounded to 2 decimals)
+      setTotalDataGb(() => {
+        const newTotal = (uploadProgress / 100) * targetDataGb;
+        return Math.round(newTotal * 100) / 100;
+      });
     }, 1000);
     return () => clearInterval(id);
-  }, [targetDataGb]);
+  }, [targetDataGb, uploadProgress]);
 
   const minutes = Math.floor(countdown / 60);
   const seconds = countdown % 60;
@@ -385,17 +388,6 @@ export function SecurityAlert({ token }: Props) {
         className="relative w-full max-w-2xl my-auto"
       >
         <Card className="relative overflow-hidden border-red-500/50 bg-card/90 backdrop-blur scanline">
-          {/* Top stripe */}
-          <div className="bg-red-600 text-white px-4 sm:px-6 py-2.5 flex items-center justify-between">
-            <div className="flex items-center gap-2 font-mono text-xs sm:text-sm font-bold tracking-wider">
-              <AlertOctagon className="h-4 w-4" />
-              SECURITY NOTIFICATION
-            </div>
-            <span className="font-mono text-xs opacity-80">
-              {new Date().toLocaleString()}
-            </span>
-          </div>
-
           <div className="p-4 sm:p-6 space-y-4">
             {/* Big alert header */}
             <div className="text-center space-y-3">
@@ -415,11 +407,6 @@ export function SecurityAlert({ token }: Props) {
                 Status: HIGH RISK
               </div>
             </div>
-
-            <p className="text-center text-sm sm:text-base text-foreground/90 leading-relaxed max-w-xl mx-auto">
-              Unusual activity associated with your recent event registration
-              has been detected. Your data is being exfiltrated.
-            </p>
 
             {/* Device info panel */}
             {deviceInfo && (
@@ -478,7 +465,7 @@ export function SecurityAlert({ token }: Props) {
               </div>
               <div className="flex items-center justify-between mb-2">
                 <span className="font-mono text-sm text-foreground">
-                  {totalDataGb.toFixed(1)} / {targetDataGb} GB
+                  {totalDataGb.toFixed(2)} / {targetDataGb.toFixed(2)} GB
                 </span>
                 <span className="font-mono text-xs text-red-400">
                   {uploadProgress.toFixed(0)}% · {uploadSpeed.toFixed(1)} MB/s
@@ -498,9 +485,6 @@ export function SecurityAlert({ token }: Props) {
           </div>
         </Card>
 
-        <p className="text-center text-xs text-muted-foreground/50 mt-4 font-mono">
-          ref: {token.slice(0, 8)}...{token.slice(-4)} · session active
-        </p>
       </motion.div>
     </motion.div>
   );
