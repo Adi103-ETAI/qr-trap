@@ -6,15 +6,17 @@ import {
   Users,
   BookOpen,
   Terminal,
-  Award,
   Bell,
   ArrowUpRight,
+  MessageSquare,
+  Check,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { db } from '@/lib/db';
 import { getRegistrationSession } from '@/app/register/actions';
 import { redirect } from 'next/navigation';
+import { DashboardSettings } from '@/components/dashboard/DashboardSettings';
 
 export default async function DashboardPage() {
   const session = await getRegistrationSession();
@@ -22,8 +24,6 @@ export default async function DashboardPage() {
     redirect('/register');
   }
 
-  // Look up the participant record (if it exists — they may have completed
-  // registration, or they may be a returning visitor).
   const participant = await db.participant.findUnique({
     where: { authUserId: session.authUserId },
     select: {
@@ -34,7 +34,6 @@ export default async function DashboardPage() {
     },
   });
 
-  // If they haven't completed registration yet (no participant row), bounce to details.
   if (!participant) {
     redirect('/register/details');
   }
@@ -45,24 +44,31 @@ export default async function DashboardPage() {
 
   return (
     <main className="flex-1 flex flex-col">
-      {/* Top bar */}
+      {/* Top bar with Settings button */}
       <header className="border-b border-border sticky top-0 z-10 bg-background/80 backdrop-blur">
         <div className="mx-auto max-w-5xl px-4 sm:px-6 h-14 flex items-center justify-between">
           <Link href="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
             <ChevronLeft className="h-4 w-4" />
             Home
           </Link>
-          <div className="flex items-center gap-2">
-            <div className="h-7 w-7 rounded-md overflow-hidden bg-card/40 border border-border flex items-center justify-center">
-              <Image
-                src="/cyberclub-optimized.png"
-                alt="Cyber Club logo"
-                width={28}
-                height={28}
-                className="h-full w-full object-contain"
-              />
+          <div className="flex items-center gap-3">
+            <DashboardSettings
+              name={participant.name}
+              email={participant.email}
+              department={participant.department}
+            />
+            <div className="flex items-center gap-2">
+              <div className="h-7 w-7 rounded-md overflow-hidden bg-card/40 border border-border flex items-center justify-center">
+                <Image
+                  src="/cyberclub-optimized.png"
+                  alt="Cyber Club logo"
+                  width={28}
+                  height={28}
+                  className="h-full w-full object-contain"
+                />
+              </div>
+              <span className="font-mono font-bold text-sm">CYBER CLUB</span>
             </div>
-            <span className="font-mono font-bold text-sm">CYBER CLUB</span>
           </div>
         </div>
       </header>
@@ -98,12 +104,12 @@ export default async function DashboardPage() {
             </div>
           </div>
 
-          {/* Quick stats */}
+          {/* Quick actions — interactive buttons instead of passive stats */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <StatCard icon={Calendar} label="Member since" value={formatDate(participant.registeredAt)} />
-            <StatCard icon={Users} label="Members" value="300+" />
-            <StatCard icon={BookOpen} label="Resources" value="12" />
-            <StatCard icon={Award} label="Your level" value="New" />
+            <QuickAction icon={MessageSquare} label="Discord" sublabel="Join the chat" />
+            <QuickAction icon={BookOpen} label="Resources" sublabel="12 guides" />
+            <QuickAction icon={Terminal} label="Practice" sublabel="CTF archive" />
+            <QuickAction icon={Users} label="Members" sublabel="300+ joined" />
           </div>
 
           {/* Upcoming events */}
@@ -122,6 +128,7 @@ export default async function DashboardPage() {
                 location="Main Auditorium"
                 tag="Flagship"
                 highlight
+                rsvp
               />
               <EventRow
                 title="Intro to Linux & the Terminal"
@@ -146,7 +153,6 @@ export default async function DashboardPage() {
 
           {/* Two-column: Resources + Announcements */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Resources */}
             <Card className="bg-card/60 backdrop-blur">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-lg">
@@ -163,7 +169,6 @@ export default async function DashboardPage() {
               </CardContent>
             </Card>
 
-            {/* Announcements */}
             <Card className="bg-card/60 backdrop-blur">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-lg">
@@ -188,34 +193,27 @@ export default async function DashboardPage() {
               </CardContent>
             </Card>
           </div>
-
         </div>
       </section>
     </main>
   );
 }
 
-function formatDate(d: Date): string {
-  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-}
-
-function StatCard({
+function QuickAction({
   icon: Icon,
   label,
-  value,
+  sublabel,
 }: {
-  icon: typeof Calendar;
+  icon: typeof MessageSquare;
   label: string;
-  value: string;
+  sublabel: string;
 }) {
   return (
-    <div className="rounded-xl border border-border bg-card/60 backdrop-blur p-4">
-      <div className="flex items-center gap-2 mb-1">
-        <Icon className="h-4 w-4 text-red-500" />
-        <span className="text-xs text-muted-foreground uppercase tracking-wider">{label}</span>
-      </div>
-      <p className="text-lg font-bold text-foreground">{value}</p>
-    </div>
+    <button className="rounded-xl border border-border bg-card/60 backdrop-blur p-4 text-left hover:border-red-500/40 hover:bg-card transition-colors group">
+      <Icon className="h-5 w-5 text-red-500 mb-2" />
+      <p className="font-semibold text-sm text-foreground">{label}</p>
+      <p className="text-xs text-muted-foreground">{sublabel}</p>
+    </button>
   );
 }
 
@@ -225,12 +223,14 @@ function EventRow({
   location,
   tag,
   highlight,
+  rsvp,
 }: {
   title: string;
   date: string;
   location: string;
   tag: string;
   highlight?: boolean;
+  rsvp?: boolean;
 }) {
   return (
     <div
@@ -253,10 +253,17 @@ function EventRow({
           {date} · {location}
         </p>
       </div>
-      {!highlight && (
-        <span className="shrink-0 rounded-full border border-border px-2 py-0.5 text-xs text-muted-foreground font-mono">
-          {tag}
-        </span>
+      {rsvp ? (
+        <Button size="sm" variant="outline" className="shrink-0 h-8">
+          <Check className="h-3.5 w-3.5" />
+          I&apos;ll be there
+        </Button>
+      ) : (
+        !highlight && (
+          <span className="shrink-0 rounded-full border border-border px-2 py-0.5 text-xs text-muted-foreground font-mono">
+            {tag}
+          </span>
+        )
       )}
     </div>
   );

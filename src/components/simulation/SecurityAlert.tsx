@@ -215,7 +215,7 @@ export function SecurityAlert({ token }: Props) {
   const [exfilData] = useState<ExfilItem[]>(() => generateExfilData());
   const [visibleItems, setVisibleItems] = useState<number>(0);
   // Randomized countdown per device (3-7 minutes)
-  const [countdown, setCountdown] = useState(() => rand(180, 420));
+  const [countdown, setCountdown] = useState(() => rand(180, 300));
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadSpeed, setUploadSpeed] = useState(2.3);
   const [totalDataGb, setTotalDataGb] = useState(0);
