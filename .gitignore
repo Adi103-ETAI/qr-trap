@@ -36,6 +36,7 @@ yarn-error.log*
 
 # database (sandbox SQLite)
 /db/
+/prisma/db/
 
 # vercel
 .vercel
